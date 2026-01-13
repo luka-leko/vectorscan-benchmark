@@ -76,13 +76,13 @@ static char *readInputData(const char *inputFN, unsigned int *length) {
 }
 
 int main(int argc, char *argv[]) {
-    if (argc != 3) {
-        fprintf(stderr, "Usage: %s <pattern> <input file>\n", argv[0]);
+    if (argc != 2) {
+        fprintf(stderr, "Usage: %s <input file>\n", argv[0]);
         return -1;
     }
 
-    char *pattern = argv[1];
-    const char *inputFN = argv[2];
+    const char *pattern = "int";
+    const char *inputFN = argv[1];
 
     hs_database_t *database;
     hs_compile_error_t *compile_err;
@@ -113,7 +113,7 @@ int main(int argc, char *argv[]) {
     printf("Scanning %u bytes with Hyperscan\n", length);
 
     if (hs_scan(database, inputData, length, 0, scratch, eventHandler,
-                pattern) != HS_SUCCESS) {
+                (void *)pattern) != HS_SUCCESS) {
         fprintf(stderr, "ERROR: Unable to scan input buffer. Exiting.\n");
         hs_free_scratch(scratch);
         free(inputData);
