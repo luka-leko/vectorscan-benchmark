@@ -8,7 +8,7 @@
 static int eventHandler(unsigned int id, unsigned long long from, unsigned long long to,
                         unsigned int flags,
                         void* ctx) {  // cppcheck-suppress constParameterCallback
-    printf("Match for pattern \"%s\" at offset %llu\n", ((char**)ctx)[id], to);
+    printf("Match for pattern \"%s\" with id \"%d\" at offset %llu\n", ((char**)ctx)[id], id, to);
     return 0;
 }
 
@@ -78,10 +78,10 @@ int main(int argc, char* argv[]) {
         return -1;
     }
 
-    const unsigned int elements = 2;
-    const char* const expressions[elements] = {"int", "char"};
-    const unsigned int flags[elements] = {HS_FLAG_DOTALL, HS_FLAG_DOTALL};
-    const unsigned int ids[elements] = {0, 1};
+    const unsigned int elements = 3;
+    const char* const expressions[elements] = {"int", "char", "0 & !1"};
+    const unsigned int flags[elements] = {0, 0, HS_FLAG_COMBINATION};
+    const unsigned int ids[elements] = {0, 1, 2};
     hs_database_t* database;
     hs_compile_error_t* compile_err;
     if (hs_compile_multi(expressions, flags, ids, elements, HS_MODE_BLOCK, NULL, &database,
