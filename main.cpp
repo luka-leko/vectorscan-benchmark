@@ -7,6 +7,7 @@
 #include <iostream>
 #include "hs/hs.h"
 #include "nlohmann/json.hpp"
+#include <chrono>
 
 int n_matches = 0;
 static int eventHandler(unsigned int id, unsigned long long from, unsigned long long to,
@@ -127,21 +128,27 @@ int main(int argc, char* argv[]) {
     const size_t BUFFER_SIZE = 1024;
     char buffer[BUFFER_SIZE];
     size_t n_lines = 0;
-    std::cout << "Start scanning..." << std::endl;
     size_t scanned_bytes = 0;
+    std::cout << "Start scanning..." << std::endl;
+    auto start = std::chrono::high_resolution_clock::now();
     while (file.getline(buffer, BUFFER_SIZE)) {
         n_lines++;
         size_t input_len = strlen(buffer);
         scanned_bytes += input_len + 1;
         if (hs_scan(database, buffer, input_len, 0, scratch, eventHandler, (void*)expressions) !=
-            HS_SUCCESS) {
+        HS_SUCCESS) {
             fprintf(stderr, "ERROR: Unable to scan input buffer. Exiting.\n");
             hs_free_database(database);
             hs_free_scratch(scratch);
             return -1;
         }
     }
-    std::cout << "Scanned a total of " << scanned_bytes / 1024 / 1024 << " MB across " << n_lines << " lines." << std::endl;
+    auto end = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    size_t scanned_MB = scanned_bytes / 1024 / 1024;
+    float duration_seconds = duration.count() / 1000.0;
+    std::cout << "Scanned a total of " << scanned_MB << " MB across " << n_lines << " line scans in " << duration_seconds << " seconds." << std::endl;
+    std::cout << "=> " << scanned_MB / duration_seconds << "MB/s scans." << std::endl;
 
     file.close();
 
